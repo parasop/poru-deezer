@@ -43,8 +43,9 @@ class Deezer extends poru_1.Plugin {
                 return this.resolve({ query: newURL, requester });
             }
         }
+        if (source?.toLowerCase() === "deezer" && !this.check(query))
+            return this.getQuerySong(query, requester);
         const [, type, id] = DEEZER_REGEX.exec(query) ?? [];
-        console.log(type, id);
         switch (type) {
             case "track":
                 {
@@ -88,19 +89,17 @@ class Deezer extends poru_1.Plugin {
         try {
             const artistData = await this.getData(`/artist/${id}`);
             const artist = await this.getData(`/artist/${id}/top`);
-            console.log(artist);
-            await this.fetchArtistTracks(artist);
+            await this.getArtistTracks(artist);
             if (artist.data.length === 0)
                 return this.buildResponse("LOAD_FAILED", [], undefined, "This artist does not have any top songs");
             const unresolvedArtistTracks = await Promise.all(artist.data.map((x) => this.buildUnresolved(x, requester)));
-            console.log(unresolvedArtistTracks);
             return this.buildResponse("PLAYLIST_LOADED", unresolvedArtistTracks, `${artistData.name}'s top songs`);
         }
         catch (e) {
             return this.buildResponse("LOAD_FAILED", [], undefined, e.body?.error.message ?? e.message);
         }
     }
-    async fetchArtistTracks(deezerArtist) {
+    async getArtistTracks(deezerArtist) {
         let nextPage = deezerArtist.next;
         let pageLoaded = 1;
         while (nextPage) {
@@ -111,6 +110,18 @@ class Deezer extends poru_1.Plugin {
             deezerArtist.data.push(...json.data);
             nextPage = json.next;
             pageLoaded++;
+        }
+    }
+    async getQuerySong(query, requester) {
+        if (this.check(query))
+            return this.resolve(query);
+        try {
+            let tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`);
+            const unresolvedTracks = await Promise.all(tracks.data.map((x) => this.buildUnresolved(x, requester)));
+            return this.buildResponse("SEARCH_RESULT", unresolvedTracks);
+        }
+        catch (e) {
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async getAlbum(id, requester) {

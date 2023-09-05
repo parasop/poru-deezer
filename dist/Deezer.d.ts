@@ -13,7 +13,8 @@ export declare class Deezer extends Plugin {
     private getTrack;
     private getPlaylist;
     private getArtist;
-    fetchArtistTracks(deezerArtist: any): Promise<void>;
+    getArtistTracks(deezerArtist: any): Promise<void>;
+    getQuerySong(query: any, requester: any): any;
     private getAlbum;
     private decodeDeezerShareLink;
     getData(endpoint: string): Promise<unknown>;

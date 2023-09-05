@@ -60,17 +60,17 @@ export class Deezer extends Plugin {
 
     }
 
+    if (source?.toLowerCase() === "deezer" && !this.check(query))
+      return this.getQuerySong(query, requester);
+
     const [, type, id] = DEEZER_REGEX.exec(query) ?? [];
 
-    console.log(type, id)
 
     switch (type) {
 
       case "track":
         {
-
           return this.getTrack(id, requester)
-
         }
       case "album":
         {
@@ -78,16 +78,15 @@ export class Deezer extends Plugin {
         }
       case "playlist":
         {
-
           return this.getPlaylist(id, requester)
-
         }
       case "artist":
         {
-
           return this.getArtist(id, requester)
-
-
+        }
+      default:
+        {
+          return this._resolve({ query, source: this.poru?.options.defaultPlatform, requester: requester })
         }
 
     }
@@ -152,7 +151,6 @@ export class Deezer extends Plugin {
       const unresolvedArtistTracks = await Promise.all(
         artist.data.map((x) => this.buildUnresolved(x, requester))
       );
-      console.log(unresolvedArtistTracks)
 
       return this.buildResponse("PLAYLIST_LOADED", unresolvedArtistTracks, `${artistData.name}'s top songs`);
 
@@ -171,11 +169,11 @@ export class Deezer extends Plugin {
 
   async getArtistTracks(deezerArtist) {
     let nextPage = deezerArtist.next;
-     let pageLoaded = 1;
+    let pageLoaded = 1;
     while (nextPage) {
       if (!nextPage) break;
       const req = await fetch(nextPage);
-      const json:any = await req.json();
+      const json: any = await req.json();
 
       deezerArtist.data.push(...json.data);
 
@@ -185,18 +183,18 @@ export class Deezer extends Plugin {
   }
 
 
-  async  getQuerySong(query,requester) {
+  async getQuerySong(query, requester) {
     if (this.check(query)) return this.resolve(query);
 
     try {
-      if (this.check(query)) return this.resolve(query);
-      let tracks:any = await this.getData(`/search?q="${query}"`);
-
-      const unresolvedTrack = await this.buildUnresolved(tracks.data[0],requester);
-      return this.buildResponse("TRACK_LOADED", [unresolvedTrack]);
+      let tracks: any = await this.getData(`/search?q=${encodeURIComponent(query)}`);
+      const unresolvedTracks = await Promise.all(
+        tracks.data.map((x) => this.buildUnresolved(x, requester))
+      );
+      return this.buildResponse("SEARCH_RESULT", unresolvedTracks);
     } catch (e) {
       return this.buildResponse(
-        "LOAD_FAILED",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message
