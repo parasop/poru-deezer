@@ -63,13 +63,17 @@ class Deezer extends poru_1.Plugin {
                 {
                     return this.getArtist(id, requester);
                 }
+            default:
+                {
+                    return this._resolve({ query, source: this.poru?.options.defaultPlatform, requester: requester });
+                }
         }
     }
     async getTrack(id, requester) {
         try {
             const track = await this.getData(`/track/${id}`);
             const unresolvedTracks = await this.buildUnresolved(track, requester);
-            return this.buildResponse("TRACK_LOADED", unresolvedTracks);
+            return this.buildResponse("TRACK_LOADED", [unresolvedTracks]);
         }
         catch (e) {
             return this.buildResponse("LOAD_FAILED", [], undefined, e.body?.error.message ?? e.message);

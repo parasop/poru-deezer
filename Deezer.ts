@@ -101,7 +101,7 @@ export class Deezer extends Plugin {
 
       const unresolvedTracks = await this.buildUnresolved(track, requester)
 
-      return this.buildResponse("TRACK_LOADED", unresolvedTracks);
+      return this.buildResponse("TRACK_LOADED", [unresolvedTracks]);
 
     } catch (e) {
       return this.buildResponse(
