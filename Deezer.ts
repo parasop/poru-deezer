@@ -266,7 +266,7 @@ export class Deezer extends Plugin {
         identifier: track.id,
         isSeekable: true,
         author: track.artist ? track.artist.name : "Unknown",
-        length: track.duration,
+        length: track.duration*1000,
         isStream: false,
         title: track.title,
         uri: track.link,
