@@ -1,5 +1,5 @@
 import { Poru, ResolveOptions, Track, Plugin } from "poru";
-export type loadType = "TRACK_LOADED" | "PLAYLIST_LOADED" | "SEARCH_RESULT" | "NO_MATCHES" | "LOAD_FAILED";
+export type loadType = "track" | "playlist" | "search" | "empty" | "error";
 export declare class Deezer extends Plugin {
     poru: Poru;
     private _resolve;

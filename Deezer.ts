@@ -256,7 +256,6 @@ export class Deezer extends Plugin {
 
 
   async buildUnresolved(track, requester) {
-    console.log(track)
     if (!track)
       throw new ReferenceError("The Deezer track object was not provided");
 
