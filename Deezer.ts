@@ -10,11 +10,11 @@ const DEEZER_REGEX = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(trac
 const ISRC_PREFIX = "dzisrc:";
 
 export type loadType =
-  | "track"
-  | "playlist"
-  | "search"
-  | "empty"
-  | "error";
+  | "TRACK_LOADED"
+  | "PLAYLIST_LOADED"
+  | "SEARCH_RESULT"
+  | "NO_MATCHES"
+  | "LOAD_FAILED";
 
 
 
@@ -101,11 +101,11 @@ export class Deezer extends Plugin {
 
       const unresolvedTracks = await this.buildUnresolved(track, requester)
 
-      return this.buildResponse("track", [unresolvedTracks]);
+      return this.buildResponse("TRACK_LOADED", [unresolvedTracks]);
 
     } catch (e) {
       return this.buildResponse(
-        "error",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message
@@ -125,11 +125,11 @@ export class Deezer extends Plugin {
         playlist.tracks.data.map((x) => this.buildUnresolved(x, requester))
       );
 
-      return this.buildResponse("playlist", unresolvedPlaylistTracks, playlist.title);
+      return this.buildResponse("PLAYLIST_LOADED", unresolvedPlaylistTracks, playlist.title);
 
     } catch (e) {
       return this.buildResponse(
-        "error",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message
@@ -146,17 +146,17 @@ export class Deezer extends Plugin {
       const artist: any = await this.getData(`/artist/${id}/top`);
       await this.getArtistTracks(artist)
 
-      if (artist.data.length === 0) return this.buildResponse("error", [], undefined, "This artist does not have any top songs");
+      if (artist.data.length === 0) return this.buildResponse("NO_MATCHES", [], undefined, "This artist does not have any top songs");
 
       const unresolvedArtistTracks = await Promise.all(
         artist.data.map((x) => this.buildUnresolved(x, requester))
       );
 
-      return this.buildResponse("playlist", unresolvedArtistTracks, `${artistData.name}'s top songs`);
+      return this.buildResponse("PLAYLIST_LOADED", unresolvedArtistTracks, `${artistData.name}'s top songs`);
 
     } catch (e) {
       return this.buildResponse(
-        "error",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message
@@ -191,10 +191,10 @@ export class Deezer extends Plugin {
       const unresolvedTracks = await Promise.all(
         tracks.data.map((x) => this.buildUnresolved(x, requester))
       );
-      return this.buildResponse("search", unresolvedTracks);
+      return this.buildResponse("SEARCH_RESULT", unresolvedTracks);
     } catch (e) {
       return this.buildResponse(
-        "empty",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message
@@ -215,11 +215,11 @@ export class Deezer extends Plugin {
         album.tracks.data.map((x) => this.buildUnresolved(x, requester))
       );
 
-      return this.buildResponse("playlist", unresolvedAlbumTracks, album.title);
+      return this.buildResponse("PLAYLIST_LOADED", unresolvedAlbumTracks, album.title);
 
     } catch (e) {
       return this.buildResponse(
-        "error",
+        "NO_MATCHES",
         [],
         undefined,
         e.body?.error.message ?? e.message

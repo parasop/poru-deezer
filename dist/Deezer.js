@@ -73,20 +73,20 @@ class Deezer extends poru_1.Plugin {
         try {
             const track = await this.getData(`/track/${id}`);
             const unresolvedTracks = await this.buildUnresolved(track, requester);
-            return this.buildResponse("track", [unresolvedTracks]);
+            return this.buildResponse("TRACK_LOADED", [unresolvedTracks]);
         }
         catch (e) {
-            return this.buildResponse("error", [], undefined, e.body?.error.message ?? e.message);
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async getPlaylist(id, requester) {
         try {
             const playlist = await this.getData(`/playlist/${id}`);
             const unresolvedPlaylistTracks = await Promise.all(playlist.tracks.data.map((x) => this.buildUnresolved(x, requester)));
-            return this.buildResponse("playlist", unresolvedPlaylistTracks, playlist.title);
+            return this.buildResponse("PLAYLIST_LOADED", unresolvedPlaylistTracks, playlist.title);
         }
         catch (e) {
-            return this.buildResponse("error", [], undefined, e.body?.error.message ?? e.message);
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async getArtist(id, requester) {
@@ -95,12 +95,12 @@ class Deezer extends poru_1.Plugin {
             const artist = await this.getData(`/artist/${id}/top`);
             await this.getArtistTracks(artist);
             if (artist.data.length === 0)
-                return this.buildResponse("error", [], undefined, "This artist does not have any top songs");
+                return this.buildResponse("NO_MATCHES", [], undefined, "This artist does not have any top songs");
             const unresolvedArtistTracks = await Promise.all(artist.data.map((x) => this.buildUnresolved(x, requester)));
-            return this.buildResponse("playlist", unresolvedArtistTracks, `${artistData.name}'s top songs`);
+            return this.buildResponse("PLAYLIST_LOADED", unresolvedArtistTracks, `${artistData.name}'s top songs`);
         }
         catch (e) {
-            return this.buildResponse("error", [], undefined, e.body?.error.message ?? e.message);
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async getArtistTracks(deezerArtist) {
@@ -122,20 +122,20 @@ class Deezer extends poru_1.Plugin {
         try {
             let tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`);
             const unresolvedTracks = await Promise.all(tracks.data.map((x) => this.buildUnresolved(x, requester)));
-            return this.buildResponse("search", unresolvedTracks);
+            return this.buildResponse("SEARCH_RESULT", unresolvedTracks);
         }
         catch (e) {
-            return this.buildResponse("empty", [], undefined, e.body?.error.message ?? e.message);
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async getAlbum(id, requester) {
         try {
             const album = await this.getData(`/album/${id}`);
             const unresolvedAlbumTracks = await Promise.all(album.tracks.data.map((x) => this.buildUnresolved(x, requester)));
-            return this.buildResponse("playlist", unresolvedAlbumTracks, album.title);
+            return this.buildResponse("PLAYLIST_LOADED", unresolvedAlbumTracks, album.title);
         }
         catch (e) {
-            return this.buildResponse("error", [], undefined, e.body?.error.message ?? e.message);
+            return this.buildResponse("NO_MATCHES", [], undefined, e.body?.error.message ?? e.message);
         }
     }
     async decodeDeezerShareLink(url) {
