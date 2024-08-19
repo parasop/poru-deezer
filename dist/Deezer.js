@@ -43,8 +43,12 @@ class Deezer extends poru_1.Plugin {
                 return this.resolve({ query: newURL, requester });
             }
         }
-        if (source?.toLowerCase() === "deezer" && !this.check(query))
+        if (source?.toLowerCase() === "deezer" && !this.check(query)) {
             return this.getQuerySong(query, requester);
+        }
+        else {
+            return this._resolve({ query, source: source || this.poru.options.defaultPlatform, requester: requester });
+        }
         const [, type, id] = DEEZER_REGEX.exec(query) ?? [];
         switch (type) {
             case "track":
@@ -65,7 +69,7 @@ class Deezer extends poru_1.Plugin {
                 }
             default:
                 {
-                    return this._resolve({ query, source: this.poru?.options.defaultPlatform, requester: requester });
+                    return this._resolve({ query, source: source || this.poru?.options.defaultPlatform, requester: requester });
                 }
         }
     }

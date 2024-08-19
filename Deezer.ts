@@ -60,8 +60,12 @@ export class Deezer extends Plugin {
 
     }
 
-    if (source?.toLowerCase() === "deezer" && !this.check(query))
+    if (source?.toLowerCase() === "deezer" && !this.check(query)){
       return this.getQuerySong(query, requester);
+    }else{
+      return this._resolve({ query, source: source || this.poru.options.defaultPlatform, requester: requester })
+    
+    }
 
     const [, type, id] = DEEZER_REGEX.exec(query) ?? [];
 
@@ -86,7 +90,7 @@ export class Deezer extends Plugin {
         }
       default:
         {
-          return this._resolve({ query, source: this.poru?.options.defaultPlatform, requester: requester })
+          return this._resolve({ query, source: source || this.poru?.options.defaultPlatform, requester: requester })
         }
 
     }
